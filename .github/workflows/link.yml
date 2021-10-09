@@ -1,4 +1,4 @@
-name: "New Word"
+name: "Create Link"
 
 on:
   issues:
@@ -7,28 +7,22 @@ on:
 jobs:
   NewWord:
     runs-on: ubuntu-latest
-    if: startsWith(github.event.issue.body, '不要更改這裡的內容，請直接更改標題並按下`Submit new issue`!')
+    if: startsWith(github.event.issue.body, '喂!我要建立短網址啦!')
     steps:
 
     - name: Checkout
       uses: actions/checkout@v2.3.1
       
-    - name: 增加文字
+    - name: 建立短址
       env:
         REPOSITORY: ${{ github.repository }}
         EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
         EVENT_ISSUE_TITLE: ${{ github.event.issue.title }}
         EVENT_USER_LOGIN: ${{ github.event.issue.user.login }}
       run: |
-            sh word.sh "${{ github.event.issue.title }}" "${{ github.event.issue.user.login }}"
             echo ${{ secrets.GITHUB_TOKEN }} > token.txt
             gh auth login --with-token < token.txt
             echo supersecret > token.txt
             rm -r token.txt
-            git config --local user.email "kiwichang2017@gmail.com"
-            git config --local user.name "charlie-moomoo"
-            git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-            git  add .
-            git commit -m "增加@${{ github.event.issue.user.login }}的文字：${{ github.event.issue.title }}"
-            git push -u
+            gh issue comment https://github.com/charlie-moomoo/textboard/issues/${{ github.event.issue.number }} --body "$(curl -s https://ssur.cc/api.php?appkey=nZ9ZzSa4LZ4o&format=text&longurl=${{ github.event.issue.title }})"
             gh issue close https://github.com/charlie-moomoo/textboard/issues/${{ github.event.issue.number }}
